@@ -2,11 +2,13 @@ import json
 import tweepy
 import datetime
 import time
+import pandas as pd
 from tweepy import OAuthHandler
 from tweepy import Stream
 from datetime import datetime
 from captura import Captura
 from pymongo import MongoClient
+from sklearn.feature_extraction.text import CountVectorizer
 
 def run():
     consumer_key = "14I4HIvVFHzKUdE31cLMCElRD"    
@@ -25,7 +27,7 @@ def run():
     myListener.setCollectionMongo(colTwitter)
     myStream = Stream(autenticacao, listener=myListener)
 
-    keywords = ['Vasco', 'Palmeiras', 'Fluminense', 'Santos']
+    keywords = ['Vasco', 'Palmeiras', 'Fluminense', 'Corinthians', 'Flamengo']
 
     print("iniciando leitura do twitter")    
     myStream.filter(track=keywords, is_async=True)
@@ -36,7 +38,22 @@ def run():
 
     dataset = [{"created_at":item["created_at"], "text":item["text"],} for item in colTwitter.find()]
 
-    print(dataset)
+    #criando dataframe com os dados
+    df = pd.DataFrame(dataset)
+
+    #imprimindo o dataframe
+    #print(df)
+
+    #vetorizando os documentos
+    cv = CountVectorizer()
+    matriz = cv.fit_transform(df.text)
+
+    #contando o número de ocorrências das principais palavras em nosso dataset
+    word_count = pd.DataFrame(cv.get_feature_names(), columns=["word"])
+    word_count["count"] = matriz.sum(axis=0).tolist()[0]
+    word_count = word_count.sort_values("count", ascending=False).reset_index(drop=True)
+    print(word_count[:50])
+    
 
 if __name__ == '__main__':
     run()
