@@ -31,7 +31,7 @@ def run():
 
     print("iniciando leitura do twitter")    
     myStream.filter(track=keywords, is_async=True)
-    #força 10 segundos rodando pesquisa no twitter
+    #forca 10 segundos rodando pesquisa no twitter
     time.sleep(10)
     myStream.disconnect()
     print("fim leitura do twitter")
@@ -48,7 +48,7 @@ def run():
     cv = CountVectorizer()
     matriz = cv.fit_transform(df.text)
 
-    #contando o número de ocorrências das principais palavras em nosso dataset
+    #contando o numero de ocorrencias das principais palavras em nosso dataset
     word_count = pd.DataFrame(cv.get_feature_names(), columns=["word"])
     word_count["count"] = matriz.sum(axis=0).tolist()[0]
     word_count = word_count.sort_values("count", ascending=False).reset_index(drop=True)
